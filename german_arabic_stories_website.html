@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deutsch ↔ العربية | Lernen mit Geschichten</title>
+<style>
+:root{
+  --bg:#111418; --panel:#181d23; --panel2:#20262e; --text:#f4f6f8; --muted:#aab4bf;
+  --accent:#7cc4ff; --accent2:#b6e3a8; --border:#303943; --shadow:0 12px 32px rgba(0,0,0,.24);
+  --arabic:#f5efe0; --done:#90d59e;
+}
+html[data-theme="sepia"]{
+  --bg:#efe4cf; --panel:#f8efdD; --panel2:#eee0c7; --text:#3e3427; --muted:#796b58;
+  --accent:#8b5e34; --accent2:#56734f; --border:#d8c5a7; --shadow:0 12px 30px rgba(72,50,24,.12);
+  --arabic:#4a3524; --done:#4f7a55;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;transition:.2s background,.2s color}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:1180px;margin:auto;padding:22px}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);padding:12px 0 14px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.brand h1{font-size:clamp(22px,3vw,34px);margin:0;letter-spacing:-.02em}
+.brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn,.select{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:12px;padding:9px 12px}
+.btn:hover{background:var(--panel2)}
+.btn.primary{background:var(--accent);border-color:transparent;color:#0b1821;font-weight:700}
+.btn.ghost{background:transparent}
+.tabs{display:flex;gap:8px;overflow:auto;padding:14px 0 4px;scrollbar-width:thin}
+.tab{white-space:nowrap;border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:10px 13px;border-radius:999px}
+.tab.active{color:var(--text);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.panel{display:none}
+.panel.active{display:block}
+.story-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin:22px 0 14px;flex-wrap:wrap}
+.story-title h2{margin:0;font-size:27px}
+.story-title .ar-title{font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;direction:rtl;color:var(--muted);font-size:19px;margin-top:4px}
+.progress-wrap{min-width:220px}
+.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:6px}
+.progress{height:8px;border-radius:999px;background:var(--panel2);overflow:hidden}
+.progress > div{height:100%;background:var(--done);width:0%;transition:.2s}
+.story-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.para{border:1px solid var(--border);background:var(--panel);border-radius:18px;margin:12px 0;box-shadow:var(--shadow);overflow:hidden}
+.para.done{opacity:.76}
+.para-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel2)}
+.done-label{display:flex;align-items:center;gap:8px;font-weight:700;white-space:nowrap}
+.done-label input{width:18px;height:18px;accent-color:var(--done)}
+.time{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.preview{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.chev{border:0;background:transparent;color:var(--muted);font-size:18px;padding:3px 6px}
+.para-body{padding:16px}
+.para.collapsed .para-body{display:none}
+.lang-card{border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 12px;background:color-mix(in srgb,var(--panel) 88%,var(--bg))}
+.lang-label{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.lang-text{font-size:17px;line-height:1.72}
+.lang-text.ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;font-size:19px;color:var(--arabic)}
+.inline-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.mini{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:7px 10px;border-radius:10px;font-size:13px}
+.status{color:var(--muted);font-size:13px}
+.translation-box{margin-top:22px;border:1px solid var(--border);background:var(--panel);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+.translation-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.translation-pane{min-width:0}
+textarea{width:100%;min-height:170px;resize:vertical;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:14px;line-height:1.6}
+textarea.ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;font-size:18px}
+.trans-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.trans-result{min-height:170px;border:1px solid var(--border);background:var(--panel2);border-radius:14px;padding:14px;line-height:1.65;white-space:pre-wrap}
+.trans-result.ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;font-size:18px}
+.note{color:var(--muted);font-size:13px;line-height:1.5}
+kbd{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+.footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0 8px}
+@media (max-width:760px){
+  .app{padding:14px}
+  .translation-grid{grid-template-columns:1fr}
+  .story-head{align-items:flex-start}
+  .preview{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div>
+        <h1>Deutsch ↔ العربية</h1>
+        <p>German stories with Arabic side-by-side translation, TTS and progress tracking.</p>
+      </div>
+      <div class="controls">
+        <select id="theme" class="select" aria-label="Theme">
+          <option value="dark">🌙 Dark</option>
+          <option value="sepia">📜 Sepia</option>
+        </select>
+        <select id="rate" class="select" aria-label="Speech rate">
+          <option value="0.75">TTS 0.75×</option>
+          <option value="0.9" selected>TTS 0.9×</option>
+          <option value="1">TTS 1×</option>
+          <option value="1.15">TTS 1.15×</option>
+        </select>
+      </div>
+    </div>
+    <div id="tabs" class="tabs"></div>
+  </div>
+
+  <main id="main"></main>
+  <div class="footer">Progress and translated paragraphs are saved locally in your browser.</div>
+</div>
+
+<script>
+const stories = [{"id": "matilda", "title_de": "Der gefährliche Untermieter", "title_ar": "المستأجر الخطير", "source_title": "The Husband Who Sacrificed Everything (A2/B1)", "paragraphs": [{"time": "[00:10]->[00:40]", "de": "Mein Name ist Matilda. Ich bin vierunddreißig Jahre alt. Ich bin verheiratet. Mein Mann heißt Markus. Er ist neununddreißig Jahre alt."}, {"time": "[00:10]->[00:40]", "de": "Ich lebe in London. Ich bin Lehrerin. Ich unterrichte jeden Tag Kinder, aber mein Gehalt ist niedrig. Das Leben in London ist teuer, das Geld reicht nie. Mein Mann arbeitet in einer anderen Stadt."}, {"time": "[00:40]->[01:13]", "de": "Er ist oft wochenlang weg. Er schickt Geld, wenn er kann, aber es reicht nicht für die Rechnungen. Die meiste Zeit lebe ich allein. Ich putze das Haus. Abends koche ich nur für mich."}, {"time": "[00:40]->[01:13]", "de": "Ich sitze im Lampenlicht und höre der Uhr zu. Ich wünsche mir ein Kind, aber wir können es uns nicht leisten. Dieser Gedanke bleibt bei mir und tut weh. Das Dach ist undicht, der Herd ist kaputt."}, {"time": "[01:13]->[01:50]", "de": "Ich verstecke unbezahlte Rechnungen in einer Schublade. Ich erzähle es meinem Mann nicht. Er hat schon genug Sorgen. Eines Morgens vor der Schule las ich die Zeitung. Ich blieb bei den Kleinanzeigen hängen."}, {"time": "[01:13]->[01:50]", "de": "Dort stand: Zimmer zu vermieten, kurze Aufenthalte, schnelles Geld. Die Idee ging mir nicht aus dem Kopf. An diesem Nachmittag schrieb ich eine Anzeige: Zimmer frei, ruhiges Zuhause, nur für kurze Aufenthalte."}, {"time": "[01:50]->[02:22]", "de": "Meine Hand zitterte, als ich sie abschickte. Ich sagte mir, es sei vernünftig. Ich sagte mir, es sei nur vorübergehend. Zwei Tage später klopfte ein Mann an meine Tür. Sein Name war Herr Wagner."}, {"time": "[01:50]->[02:22]", "de": "Er sagte, er sei beruflich auf der Durchreise in London. Er sprach ruhig, er lächelte oft. Er sah gepflegt aus. Er stellte nur wenige Fragen. Er wollte das Zimmer oben."}, {"time": "[02:23]->[02:53]", "de": "Er sagte:\"Ich kann das Doppelte zahlen, nur für zwei Nächte.\"Das Doppelte? Ich dachte an das Dach. Ich dachte an die Rechnungen. Ich dachte nicht an meinen Mann. Ich dachte nicht an Gefahr."}, {"time": "[02:23]->[02:53]", "de": "Ich sagte Ja. Er zog noch am selben Abend mit einem kleinen Koffer ein. Er schloss leise seine Tür ab. Er blieb oben. Das Haus fühlte sich nicht mehr leer an."}, {"time": "[02:53]->[03:28]", "de": "Es fühlte sich beobachtet an. Nachts hörte ich, wie er ging und nach Mitternacht zurückkam. Seine Schritte waren langsam. Am nächsten Tag blieb er drinnen, die Vorhänge blieben geschlossen. An diesem Abend sah ich dunkle Flecken auf seinen Schuhen."}, {"time": "[02:53]->[03:28]", "de": "Ich redete mir ein, es sei Schlamm. Ich fragte nicht nach. In dieser Nacht hörte ich metallische Geräusche von oben, Möbel rücken, kratzen."}, {"time": "[03:28]->[04:00]", "de": "Ich lag still bis zum Morgen. Vor Sonnenaufgang ging er. Er verabschiedete sich nicht. Er fragte nicht nach seinem Wechselgeld. Das Zimmer oben roch seltsam, als ich es betrat."}, {"time": "[03:28]->[04:00]", "de": "Die Bettwäsche war weg. Die Dielenbretter in der Nähe der Wand waren zerkratzt. Ich öffnete das Fenster und versuchte zu atmen. An diesem Nachmittag kam mein Mann früher zurück."}, {"time": "[04:00]->[04:32]", "de": "Er sah müde aus, aber glücklich, wieder zu Hause zu sein. Er bemerkte den Geruch sofort. Er sah mich an und fragte:\"Was ist hier passiert?\"Mein Herz begann schnell zu schlagen. Ich erzählte ihm von dem Mieter. Ich erzählte ihm von dem Geld."}, {"time": "[04:00]->[04:32]", "de": "Sein Gesichtsausdruck veränderte sich langsam. Zuerst nicht mit Wut, sondern mit Angst. Später an diesem Abend kam die Polizei."}, {"time": "[04:33]->[05:06]", "de": "Sie fragten nach einem Mann, der in unserem Haus gewohnt hatte. Sie sagten, er werde wegen eines schweren Verbrechens in der nächsten Stadt gesucht. Sie sagten, es könnten noch Beweise hier sein. Sie durchsuchten das Zimmer oben. Sie sahen mich bei der Arbeit nicht an."}, {"time": "[04:33]->[05:06]", "de": "Als sie gingen, sprach mein Mann nicht. Sein Gesicht war voller Wut. In dieser Nacht schlief er auf dem Sofa. Am Morgen packte er seine Tasche."}, {"time": "[05:06]->[05:39]", "de": "Dann sah er mich an und sagte:\"Du hast einen Fremden in unser Haus gelassen, ohne es mir zu sagen. Dieses Haus war der einzige Ort, dem ich vertraut habe.\"Dann ging er. Das Haus ist jetzt wieder still, aber es fühlt sich anders an."}, {"time": "[05:06]->[05:39]", "de": "Das Geld, das ich verdient habe, ist weg. Das Dach ist immer noch undicht. Manchmal höre ich oben Schritte, obwohl niemand da ist."}, {"time": "[05:39]->[06:25]", "de": "Ich lebe noch, aber ich bin allein in einem Haus, das sich nicht mehr wie meines anfühlt. Und alles begann mit einer Anzeige und einer einsamen Entscheidung. Ich denke immer noch an diesen Tag."}, {"time": "[05:39]->[06:25]", "de": "Ich habe gelernt, dass schnelles Geld große Probleme bringen kann und dass man sein Vertrauen nie zu leichtfertig vergeben sollte. Denken Sie gut nach, bevor Sie einem Fremden vertrauen, denn eine einzige Entscheidung kann Ihr Leben für immer verändern. Wenn Ihnen diese Geschichte gefallen hat, bitte liken, kommentieren, teilen und abonnieren Sie."}]}, {"id": "johanna", "title_de": "Liebe, Verrat & Erfolg", "title_ar": "الحب والخيانة والنجاح", "source_title": "Love, Betrayal & Success", "paragraphs": [{"time": "[00:00]->[00:31]", "de": "Mein Name ist Johanna. Ich bin achtundzwanzig Jahre alt. Ich wurde in einem kleinen Haus in Mexiko geboren. Meine Familie hatte nicht viel Geld. Ich war die einzige Tochter meiner Eltern."}, {"time": "[00:00]->[00:31]", "de": "Jeden Abend betete meine Mutter für mich. Sie bat Gott, mir eine bessere Zukunft zu schenken. Ich hatte einen Traum für meine Eltern."}, {"time": "[00:32]->[01:12]", "de": "Ich wollte ihnen ein glückliches Leben geben. Ich arbeitete sehr hart. Ich suchte nach Arbeit."}, {"time": "[00:32]->[01:12]", "de": "Ich blieb bis spät in die Nacht wach und hoffte, einen Weg zu finden, etwas Geld zu verdienen. Eines Nachts, als ich auf meinem Handy las, erschien ein Pop-up auf dem Bildschirm. Darauf stand:„Finde die wahre Liebe in Amerika.\"Zuerst fand ich das albern, aber dann öffnete ich diese App und so lernte ich Lukas kennen, einen Mann aus New York."}, {"time": "[01:14]->[01:45]", "de": "Seine erste Nachricht war:„Ich brauche kein perfektes Mädchen. Ich will ein echtes.\"Von diesem Tag an sprachen wir jeden Tag miteinander. Langsam begann ich, ihm zu vertrauen. Nach ein paar Wochen fragte er mich:„Johanna, kommst du nach Amerika, um bei mir zu leben?\"Mein Herz begann schnell zu schlagen. Ich war schockiert, aber ich war auch aufgeregt."}, {"time": "[01:46]->[02:19]", "de": "Lukas versprach, mich zu heiraten. Er sagte, er würde sich um mein Visum, meinen Flug und alles andere kümmern. Als ich es meinen Eltern erzählte, machten sie sich große Sorgen. Mein Vater sagte:„Du kennst ihn nicht gut.\"Meine Mutter sagte:„Was ist, wenn er lügt? Was ist, wenn er dir wehtut?\"Ich wollte sie nicht verletzen, aber ich wollte diese Chance, mein Leben zu verändern, auch nicht verlieren."}, {"time": "[02:20]->[02:50]", "de": "Ich dachte viel nach. Ich war verwirrt. Aber in dieser Nacht traf ich eine Entscheidung. Während meine Eltern schliefen, packte ich meine Tasche. Ich ging ins Zimmer meiner Eltern und weinte."}, {"time": "[02:20]->[02:50]", "de": "Ich sagte:„Bitte vergebt mir. Ich liebe euch. Eines Tages werde ich euch stolz machen.\"In dieser Nacht ging ich zum Haus meiner besten Freundin."}, {"time": "[02:51]->[03:21]", "de": "Am nächsten Tag kam Lukas in Mexiko an. Er schickte mir eine Nachricht:„Ich bin am Flughafen. Wo bist du?\"Mein Herz schlug schnell. Ich hatte Angst. Ich fuhr zum Flughafen."}, {"time": "[02:51]->[03:21]", "de": "Ich wollte sehen, ob er echt war oder nur eine weitere Lüge. Dann sah ich ihn. Er hatte Blumen in den Händen. Er sah nervös aus. Er war wirklich gekommen."}, {"time": "[03:22]->[03:54]", "de": "Er sah echt aus. Lukas sah mich und lächelte. Er sagte:„Johanna, ich bin wegen dir gekommen. Lass uns zusammen ein neues Leben beginnen.\"Ich nahm Lukas Hand und unser neues Leben begann."}, {"time": "[03:22]->[03:54]", "de": "Die ersten paar Wochen waren wunderschön. Ich kochte das Abendessen und putzte das Haus. Ich wartete jeden Tag auf Lukas wie eine frisch verheiratete Braut."}, {"time": "[03:54]->[04:26]", "de": "Jeden Abend kam er nach Hause, küsste meine Stirn und sagte:„Ich bin zu Hause, meine geliebte Frau.\"Ich begann, an die Liebe zu glauben. Ich dachte, vielleicht habe ich das Richtige getan. Vielleicht werden es meine Eltern eines Tages auch verstehen."}, {"time": "[03:54]->[04:26]", "de": "Ich war glücklich. Nach sechs Monaten begannen sich die Dinge zu ändern. Lukas sprach nicht mehr wie früher mit mir."}, {"time": "[04:26]->[05:03]", "de": "Er kam spät nach Hause, lächelte nicht viel und ging früh schlafen. Keine Umarmungen, kein Gute-Nacht-Sagen, nur Stille. Eines Abends fragte ich ihn:„Lukas, ist alles in Ordnung?\"Er wurde wütend und sagte:„Du denkst zu viel nach, Johanna."}, {"time": "[04:26]->[05:03]", "de": "Mach nicht so ein Drama daraus.\"Tränen füllten meine Augen. Es tat weh. Der Mann, der mich einst seine Königin nannte, gab mir jetzt das Gefühl, unsichtbar zu sein."}, {"time": "[05:04]->[05:37]", "de": "Dann, eines Morgens, als wir Tee tranken, sagte er:„Ich habe eine Geschäftsreise nach Boston. Ich werde ein paar Tage weg sein.\"Ich nickte und lächelte. Ich packte seine Tasche. Ich wusste, dass etwas nicht stimmte."}, {"time": "[05:04]->[05:37]", "de": "Trotzdem blieb ich still. Ich wollte glauben, dass alles in Ordnung war. Ich wollte ihm vertrauen, aber tief im Innern wusste ich, dass meine Ehe zerbrach."}, {"time": "[05:39]->[06:16]", "de": "Eines Nachmittags ging ich zu Lukas Büro, um ihm sein Portemonnaie zu bringen, aber er war nicht da. Ich ging an einem Café vorbei und blieb stehen. Ich schaute durch das Fenster und mein Herz brach. Lukas war drinnen. Er saß mit einer anderen Frau dort."}, {"time": "[05:39]->[06:16]", "de": "Sie hielt seine Hand. Sie lachten und lächelten. Dann küsste er sie dort in der Öffentlichkeit, als hätte er keine Frau, als wäre ich nie ein Teil seines Lebens gewesen."}, {"time": "[06:16]->[06:52]", "de": "Ich fühlte mich schwach. Ich konnte mich nicht bewegen. Ich konnte nicht weinen. Ich stand einfach nur da und sah zu, wie mein Mann so tat, als hätte ich nie existiert. Ich verstand die Wahrheit."}, {"time": "[06:16]->[06:52]", "de": "Ich war nicht seine Frau. Ich war nicht seine Liebe. Ich erinnerte mich an die Worte meiner Eltern."}, {"time": "[06:16]->[06:52]", "de": "Vielleicht hatten sie recht. Vielleicht gehörte er mir nie. Ich wandte nach Hause und weinte wie ein Kind und fragte mich, was ich falsch gemacht hatte."}, {"time": "[06:54]->[07:24]", "de": "Stunden später kam er nach Hause, als wäre nichts passiert. Ich fragte ihn:„Wer ist sie?\"Er sah mich an und sagte:„Sie ist diejenige, die ich liebe, nicht du. Du warst nur ein Teil meines Einwanderungsplans, Johanna. Du kannst noch ein paar Wochen bleiben, aber danach gehst du.\"Ich erstarrte. Meine Welt blieb stehen."}, {"time": "[07:24]->[07:57]", "de": "Ich wollte schreien. Ich wollte weinen, aber ich sagte nichts. Ich ging in mein Zimmer, öffnete eine Schublade und fand den Brief, den meine Mutter mir gegeben hatte, als ich von Hause wegging."}, {"time": "[07:24]->[07:57]", "de": "Darin stand:„Wenn dein Mann dir eines Tages das Herz bricht, komm nach Hause. Wir werden immer noch warten.\"Ich hielt diesen Brief und weinte. Mein Mann hatte mich so einfach für eine andere Frau verlassen."}, {"time": "[07:58]->[08:28]", "de": "Ich hatte keine Greencard, keinen Job, keine Familie, kein Haus. Ich war allein in einem großen Land, das nicht einmal meinen Namen kannte. Ich fand ein kleines Frauenhaus. Warum hatte ich meine Mutter verlassen? Warum hatte ich ihm vertraut?"}, {"time": "[07:58]->[08:28]", "de": "Ist das alles meine Schuld? Ich fühlte mich gebrochen. Ich fühlte mich verloren. Meine Augen waren voller Tränen."}, {"time": "[08:29]->[09:05]", "de": "Ich hatte keinen Job, keinen Pass, kein Geld und niemanden, der mir hilft. Ich musste meine eigene Heldin werden. Also begann ich, hart zu arbeiten. Ich fing an, Handtaschen und Kleider zu nähen. Ich arbeitete den ganzen Tag mit meinen Händen."}, {"time": "[08:29]->[09:05]", "de": "Ich wollte einfach nur überleben. Ich erstellte eine Instagram-Seite. Ich war nervös, aber ich postete Bilder von meiner Arbeit, meinen Taschen, meinen Kleidern."}, {"time": "[09:05]->[09:38]", "de": "Zuerst bemerkte es niemand, aber langsam begangen die Leute, meine Sachen zu mögen, zu kommentieren und mir Nachrichten zu schreiben. Ich nannte es Johanna Designs. Ich arbeitete jeden Tag hart. Zwei Jahre später eröffnete ich mein eigenes Geschäft."}, {"time": "[09:05]->[09:38]", "de": "Eines Tages war ich in meinem Laden, als ich plötzlich Lukas sah. Ich erstarrte. Wir starrten uns beide schockiert an."}, {"time": "[09:39]->[10:11]", "de": "Er sah alt und müde aus. Er sagte:„Johanna, ich lag falsch. Sie hat mich verlassen. Ich habe mein Geschäft verloren."}, {"time": "[09:39]->[10:11]", "de": "Ich habe alles verloren. Bitte, ich brauche dich. Gib mir noch eine Chance.\"Ich sah ihn an, aber in meinen Gedanken sah ich die Nächte, in denen ich geweint hatte, den Schmerz, den er mir zugefügt hatte."}, {"time": "[10:11]->[10:45]", "de": "Er hatte mich nicht nur verlassen, er hatte mich gebrochen. Ich sagte laut:„Dieser Mann verfolgt mich. Er macht mir Angst.\"Die Leute blieben stehen und schauten uns an. Lukas rief:„Sie lügt. Sie ist meine Frau."}, {"time": "[10:11]->[10:45]", "de": "Ich liebe sie.\"Er versuchte, meine Hand zu berühren. Ich sagte:„Er hat mich ohne meine Erlaubnis angefasst. Ich möchte ihn anzeigen.\"Die Polizei kam."}, {"time": "[10:45]->[11:21]", "de": "Lukas weinte:„Bitte, Johanna, tu das nicht.\"Ich sagte zu ihm:„Du hast die Frau verletzt, die dich geliebt hat. Das ist keine Rache, das ist Gerechtigkeit.\"Zwei Wochen später bekam ich meine Greencard. Ich konnte endlich meine Eltern wiedersehen."}, {"time": "[10:45]->[11:21]", "de": "Ich hatte sie sehr vermisst. Also nahm ich einen Flug zurück nach Mexiko. Als ich vor meinem alten Zuhause stand, zitterten meine Hände."}, {"time": "[11:21]->[11:58]", "de": "Ich klopfte an die Tür. Meine Mutter fragte:„Wer ist da?\"Ich sagte:„Ich bin es, Johanna.\"Sie öffnete die Tür und erstarrte. Ihre Augen füllten sich mit Tränen, als sie sagte:„Johanna, meine Tochter.\"Sie nahm mein Gesicht in ihre Hände und wir weinten beide. Meine Mutter sagte:„Wir dachten, wir hätten dich verloren, aber Gott hat dich stärker zurückgebracht.\"Ich umarmte meinen Vater."}, {"time": "[11:59]->[12:30]", "de": "Ich sah sie an und sagte:„Ich habe meinen eigenen Laden in den USA. Ich habe es geschafft.\"Mein Vater lächelte und sagte:„Wir sind stolz auf dich.\"Ich wollte, dass meine Eltern jetzt ein besseres Leben führen. Also nahm ich sie mit in die USA. Ich gab ihnen Komfort, Fürsorge und Liebe, genau wie sie es mir einst gegeben hatten."}, {"time": "[12:31]->[13:08]", "de": "Ich kochte für sie und kümmerte mich um ihre Gesundheit. Monate vergingen. Eines Tages bekam ich einen Anruf von der Polizei. Sie hatten Lukas verhaftet. Er hatte nicht nur mich ausgenutzt, sondern viele andere Frauen."}, {"time": "[12:31]->[13:08]", "de": "Er hatte auch mit ihren Herzen gespielt. Ich ging zur Wache und sah ihn. Er sah mich an und sagte:„Johanna, bitte hilf mir.\"Ich sagte:„Lukas, ich könnte dich zerstören."}, {"time": "[13:09]->[13:39]", "de": "Ich könnte dafür sorgen, dass du für immer im Gefängnis bleibst, aber ich bin nicht wie du. Ich trage keinen Hass in mir. Ich vergebe dir und ich möchte dich nie wieder sehen.\"Ich ging weg, ohne mich umzudrehen. Ich fühlte keinen Schmerz mehr."}, {"time": "[13:09]->[13:39]", "de": "Ich fühlte Frieden. Vertraue niemals blind. Verlasse deine Eltern niemals für einen Fremden."}, {"time": "[13:40]->[13:59]", "de": "Deine Eltern sind deine nächsten Feinde. Sie sind die einzigen Menschen, die immer das Beste für dich wollen. Wenn dir diese Geschichte gefallen hat, bitte like, kommentiere, teile sie und abonniere das German Story Café."}]}, {"id": "birgit", "title_de": "Der vergessene Hochzeitstag", "title_ar": "ذكرى الزواج المنسية", "source_title": "The Forgotten Anniversary", "paragraphs": [{"time": "[00:00]->[00:31]", "de": "Mein Name ist Birgit. Ich bin fünfunddreißig Jahre alt. Ich habe einen Ehemann. Er heißt Lukas. Er ist neununddreißig Jahre alt."}, {"time": "[00:00]->[00:31]", "de": "Wir sind seit zehn Jahren verheiratet. Wir haben zwei wunderbare Kinder. Unser Sohn ist acht Jahre alt. Unsere Tochter ist drei Jahre alt. Ich habe immer an die Liebe geglaubt."}, {"time": "[00:32]->[01:04]", "de": "Ich glaubte, dass es in der Ehe um Respekt, Vertrauen und Fürsorge geht. Ich habe meiner Familie alles gegeben. Ich habe meinen Mann sehr geliebt."}, {"time": "[00:32]->[01:04]", "de": "Ich habe meine eigenen Träume aufgegeben, um die Träume meines Mannes zu unterstützen. Ich bin zu Hause geblieben und habe mich um die Kinder gekümmert. Ich habe das Abendessen gekocht, das Haus geputzt und abgewaschen."}, {"time": "[01:05]->[01:38]", "de": "Ich dachte, mein Mann sieht das alles. Ich dachte, er schätzt mich, aber ich habe mich geirrt. Eines Abends habe ich etwas Besonderes geplant. Es war unser zehnter Hochzeitstag. Zehn Jahre zusammen."}, {"time": "[01:05]->[01:38]", "de": "Zehn Jahre voller Liebe, Kämpfe und Opfer. Ich habe Geld gespart, um einen schönen Kuchen zu kaufen. Ich habe sein Lieblingsessen gekocht, Hähnchen mit Reis."}, {"time": "[01:39]->[02:13]", "de": "Ich habe ein Kleid getragen, das er mochte. Ich habe meine Mutter gebeten, die Kinder für eine Nacht zu nehmen. Ich wollte, dass der Abend nur für uns ist. Ich habe zu Hause gewartet. Der Tisch war gedeckt, die Kerzen brannten, aber Lukas kam nicht."}, {"time": "[01:39]->[02:13]", "de": "Ich habe ihn angerufen, aber er ist nicht rangegangen. Ich habe eine Nachricht geschickt, aber er hat nicht geantwortet. Um Mitternacht habe ich die Kerzen alleine ausgepustet."}, {"time": "[02:14]->[02:48]", "de": "Das Essen war kalt. Ich fühlte mich verletzt. Meine Augen waren voller Tränen. Um zwei Uhr morgens kam Lukas nach Hause. Er roch nach Alkohol."}, {"time": "[02:14]->[02:48]", "de": "Er war betrunken. Er lachte und sprach laut am Telefon mit seinen Freunden. Ich stand da und wartete auf ihn. Meine Augen waren rot vom Weinen. „Lukas\", sagte ich leise,„weißt du, welcher Tag heute ist?\"Er sah mich verwirrt an."}, {"time": "[02:48]->[03:19]", "de": "„Was? Es ist Freitag.\"„Es ist unser Hochzeitstag, Lukas\", sagte ich. „Zehn Jahre.\"Er erstarrte für eine Sekunde. Dann lachte er. „Oh, das habe ich vergessen."}, {"time": "[02:48]->[03:19]", "de": "Birgit, mach keine große Sache daraus. Ich war beschäftigt. Arbeit, Freunde, du weißt schon.\"Mein Herz brach. Ich sagte:„Du hast unseren Hochzeitstag vergessen, Lukas."}, {"time": "[03:19]->[03:52]", "de": "Ich habe alles vorbereitet. Ich habe auf dich gewartet und es war dir völlig egal.\"Er rollte mit den Augen und sagte:„Hör auf zu übertreiben, Birgit. Es ist nur ein Abendessen. Warum machst du so ein Drama?\"Seine Worte brachen mir das Herz."}, {"time": "[03:19]->[03:52]", "de": "Nur ein Abendessen. Für mich war es alles. Für mich war es der Beweis, dass unsere Liebe noch wichtig war, aber für ihn war es nichts."}, {"time": "[03:52]->[04:24]", "de": "In dieser Nacht habe ich geweint und geweint, bis ich keine Tränen mehr hatte. Ich fühlte mich unsichtbar. Ich fühlte mich unerwünscht, als ob er mich nicht mehr brauchte. Am nächsten Tag packte ich meine Taschen. Ich packte die Kleidung meiner Kinder."}, {"time": "[03:52]->[04:24]", "de": "Ich rief meine Mutter an. Ich sagte:„Ich kann hier nicht mehr bleiben. Ich komme zu dir.\"Als Lukas von der Arbeit zurückkam, sah er die Taschen."}, {"time": "[04:24]->[04:59]", "de": "Er sagte:„Was ist das, Birgit?\"Ich sah ihn mit Tränen in den Augen an. „Ich habe dir zehn Jahre meines Lebens gegeben. Ich habe dir meine Liebe und meine Fürsorge gegeben. Ich habe meinen Job aufgegeben, um mich um dich und unsere Kinder zu kümmern."}, {"time": "[04:24]->[04:59]", "de": "Und du konntest dich nicht einmal an diesen einen Tag erinnern und es tut dir nicht einmal leid. Ich kann das nicht mehr. Ich gehe.\"Er lachte und sagte:„Was ist los mit dir, Birgit?"}, {"time": "[05:00]->[05:31]", "de": "Sei nicht verrückt. Du übertreibst.\"„Nein\", sagte ich. „Du bist derjenige, der mich nicht schätzt. Wenn ich bei dir bleibe, werde ich mich selbst verlieren. Das kann ich nicht zulassen."}, {"time": "[05:00]->[05:31]", "de": "Auf Wiedersehen, Lukas.\"Und ich ging. Ich habe eine Zeit lang bei meiner Mutter gelebt, aber das Leben war nicht einfach. Ich hatte keinen Job, ich hatte kein eigenes Geld, aber ich hatte meine Kinder. Sie gaben mir Kraft."}, {"time": "[05:31]->[06:04]", "de": "Ich fand kleine Jobs. Ich arbeitete in einem Geschenkeladen. Abends arbeitete ich in einem Friseursalon. Lukas rief mich oft an. Er sagte:„Birgit, komm zurück."}, {"time": "[05:31]->[06:04]", "de": "Zerstöre unsere Familie nicht.\"Aber ich antwortete nicht. Ich hatte genug von leeren Versprechungen. Aus Wochen wurden Monate."}, {"time": "[05:31]->[06:04]", "de": "Meine Kinder wuchsen. Mein Sohn lernte Fahrradfahren. Meine Tochter kam in die Schule."}, {"time": "[06:04]->[06:34]", "de": "Ich war bei jedem Moment dabei. Lukas nicht. Aber manchmal kam er vorbei. Er ging mit den Kindern Eis essen. Er brachte ihnen Geschenke."}, {"time": "[06:04]->[06:34]", "de": "Er hat sie nie vergessen, aber er hat nie nach mir gefragt. Er hat sich nie entschuldigt. Er hat mir nie in die Augen gesehen. Eines Abends fragte mich mein Sohn:„Warum wohnt Papa nicht bei uns?\"Ich atmete tief durch."}, {"time": "[06:34]->[07:05]", "de": "„Manchmal\", sagte ich,„machen Erwachsene Fehler. Manchmal vergessen dich Menschen. Aber wir beide lieben dich, mein lieber Sohn."}, {"time": "[06:34]->[07:05]", "de": "Das wird sich nie ändern.\"Er umarmte mich und sagte:„Ich liebe dich auch, Mama.\"Ich küsste seinen Kopf und sagte:„Alles wird gut.\"Und ich hoffte, dass es wahr war. Ein Jahr verging. Mein Sohn hatte eine Theateraufführung in der Schule."}, {"time": "[07:05]->[07:36]", "de": "Er war sehr aufgeregt. Er wollte, dass beide Eltern kommen. Ich sagte Ja und ich wusste, dass Lukas auch da sein würde. Als ich an der Schule ankam, sah ich ihn am Tor stehen. Er sah älter aus."}, {"time": "[07:05]->[07:36]", "de": "Seine Haare waren grauer, seine Augen waren müde. Aber als er mich sah, wurde sein Gesichtsausdruck weicher. „Birgit\", sagte er. Ich antwortete nicht. Wir saßen getrennt."}, {"time": "[07:36]->[08:07]", "de": "Die Kinder spielten ihr Stück. Sie sahen uns lächelnd an. Für sie waren wir immer noch Mama und Papa. Nach dem Stück kam Lukas zu mir. „Birgit\", sagte er,„bitte, können wir reden?\"Ich wollte weggehen, aber etwas in seinen Augen hielt mich auf."}, {"time": "[07:36]->[08:07]", "de": "Wir standen draußen in der Nähe des Schulgartens. Seine Stimme zitterte. „Ich war ein Dummkopf\", sagte er."}, {"time": "[08:07]->[08:39]", "de": "„Ich habe unseren Hochzeitstag vergessen. Aber es war nicht nur dieser Tag. Ich habe dich vergessen. Ich habe vergessen, dich zu schätzen. Ich habe vergessen zu sehen, wie viel du mir gegeben hast und deshalb habe ich dich verloren.\"Ich sah ihm in die Augen."}, {"time": "[08:07]->[08:39]", "de": "Er sah müde, aber ehrlich aus. Meine Augen füllten sich mit Tränen. „Ich dachte, es wäre dir egal\", sagte ich. „Es war mir nicht egal\", sagte er."}, {"time": "[08:40]->[09:13]", "de": "„Aber ich war blind. Ich war egoistisch. Birgit, ich möchte dir sagen, dass es mir leid tut. Ich habe mich geändert. Ich trinke nicht mehr."}, {"time": "[08:40]->[09:13]", "de": "Ich verschwende keine Zeit mehr mit Freunden. Ich arbeite, ich gehe nach Hause, aber mein Zuhause ist leer ohne dich. Bitte gib mir noch eine Chance.\"Mein Herz schlug schnell. Ich wusste nicht, was ich sagen sollte. In diesem Moment rannte unsere Tochter zu uns."}, {"time": "[09:14]->[09:45]", "de": "Sie hielt meine Hand und sah ihn an. „Papa, kannst du heute bitte mit uns nach Hause kommen?\"Lukas Augen füllten sich mit Tränen. Er sah mich an und wartete. Ich umarmte meine Tochter. Kinder brauchen ihren Vater, dachte ich."}, {"time": "[09:14]->[09:45]", "de": "Aber kann ich ihm wieder vertrauen? Ich sah Lukas an. Er weinte zum ersten Mal. Ich sah Traurigkeit in seinen Augen."}, {"time": "[09:45]->[10:15]", "de": "„Birgit\", sagte er,„ich will dich nicht noch einmal verlieren. Ich werde den Rest meines Lebens damit verbringen, zu beweisen, dass du mir wichtig bist und dass ich dich nie wieder vergessen werde. Ich liebe dich. Bitte verzeih mir.\"Ich schloss meine Augen."}, {"time": "[09:45]->[10:15]", "de": "Mein Kopf war voller Erinnerungen. Unser Hochzeitstag, die Nacht, in der ich alleine weinte. Das Jahr, in dem ich alleine kämpfte."}, {"time": "[10:15]->[10:48]", "de": "Und jetzt dieser Moment. Schließlich sagte ich:„Lukas, ich verzeihe dir. Und ich möchte, dass wir wieder zusammen sind. Nicht, weil ich schwach bin. Ich verzeihe dir, weil ich stark bin."}, {"time": "[10:15]->[10:48]", "de": "Ich möchte, dass unsere Kinder in Liebe aufwachsen, nicht in Verbitterung. Ich gebe uns eine zweite Chance. Verschwende sie nicht.\"Lukas nahm meine Hände und weinte. Dann umarmte er mich."}, {"time": "[10:48]->[11:20]", "de": "Die Kinder rannten lächelnd zu uns und riefen:„Papa, Mama, wir sind wieder zusammen.\"„Ja\", sagte ich,„wir sind wieder eine Familie. Keine perfekte, aber eine echte.\"Ich hielt sie in meinen Armen. Mein Herz war glücklich. Wir gingen zusammen nach Hause. Manchmal stirbt die Liebe in kleinen Dingen: ignoriert werden, nicht miteinander reden oder einen Hochzeitstag vergessen."}, {"time": "[11:21]->[11:39]", "de": "Aber die Liebe kann zurückkehren, wenn die Herzen bereit sind, sich zu ändern und wenn die Menschen bereit sind, füreinander zu kämpfen. Wenn dir diese Geschichte gefallen hat, lass bitte ein Like da, kommentiere, teile sie und abonniere den Kanal."}]}, {"id": "lena", "title_de": "Das Doppelleben", "title_ar": "الحياة المزدوجة", "source_title": "The Double Life", "paragraphs": [{"time": "[00:00]->[00:32]", "de": "Mein Name ist Lena. Ich bin fünfunddreißig Jahre alt. Ich bin verheiratet. Mein Mann heißt Paul. Er ist neununddreißig Jahre alt."}, {"time": "[00:00]->[00:32]", "de": "Paul und ich waren seit acht Jahren verheiratet. Wir hatten keine Kinder. Wir haben es zwei Jahre lang versucht."}, {"time": "[00:00]->[00:32]", "de": "Wir machten Tests und hatten Termine bei Ärzten. Es ist nicht passiert. Irgendwann haben wir aufgehört, es zu versuchen."}, {"time": "[00:33]->[01:04]", "de": "Wir haben aufgehört, darüber zu sprechen. Wir sagten uns, dass es uns gut geht. Paul ist beruflich viel gereist. Drei Tage die Woche, manchmal vier. Paul sagte, seine Firma brauche ihn."}, {"time": "[00:33]->[01:04]", "de": "Ich glaubte ihm. Ich vertraute ihm. Wenn man jemanden heiratet, zweifelt man nicht an jedem Satz."}, {"time": "[00:33]->[01:04]", "de": "Man entspannt sich. Ich dachte, wir bauen etwas Stabiles auf. Ich lag falsch."}, {"time": "[01:05]->[01:36]", "de": "Eines Montagnachmittags machte ich die Wäsche. Pauls Koffer lag halb offen auf dem Bett. Er war gerade von einer Reise zurückgekommen. Ich hob den Koffer auf, um ihn wegzustellen. Eine Karte war in seinem Koffer."}, {"time": "[01:05]->[01:36]", "de": "Sie rutschte heraus. Ich hätte sie fast ignoriert. Dann sah ich die Vorderseite:„Alles Gute zum Geburtstag, Papa. Ich erstarrte. Wir haben keine Kinder."}, {"time": "[01:36]->[02:09]", "de": "Ich stand lange da. Ich sagte mir, es sei ein Scherz. Vielleicht vom Kind eines Kollegen, vielleicht von einer Nichte. Ich öffnete die Karte. Darin war die Handschrift eines Kindes."}, {"time": "[01:36]->[02:09]", "de": "Darauf stand:„Wir haben dich so lieb. Danke, dass du zu meiner Theateraufführung in der Schule gekommen bist. In Liebe, Niklas und Lea. Zwei Namen, zwei Kinder, nicht meine, nicht unsere."}, {"time": "[02:10]->[02:42]", "de": "Ich setzte mich auf den Boden, die Karte in meinen Händen und las sie immer wieder:„Danke, dass du zu meiner Theateraufführung gekommen bist. Wann war die Aufführung? Letzte Woche sagte Paul, er sei in Meetings. Ich erinnere mich, weil ich fragte, ob wir zusammen essen könnten."}, {"time": "[02:10]->[02:42]", "de": "Paul sagte:„Nein, wichtiges Meeting. War an diesem Abend die Theateraufführung? Ich konnte nicht schlafen."}, {"time": "[02:42]->[03:13]", "de": "Paul schlief neben mir. Ich drehte mich zu ihm. Ich versuchte, etwas anderes in seinem Gesicht zu sehen. Schuld, Stress, Angst. Da war nichts."}, {"time": "[02:42]->[03:13]", "de": "Nur der Mann, den ich geheiratet habe. Ich lag wach, sah ihm beim Schlafen zu und fragte mich, wer er war. Am nächsten Morgen war die Karte weg. Ich überprüfte den Koffer noch einmal. Ich kontrollierte jede Tasche, jeden Reißverschluss."}, {"time": "[03:14]->[03:46]", "de": "Leer. Paul hatte sie versteckt, während ich unter der Dusche war. Das bedeutete, er wusste es. Er wusste, dass ich vielleicht nachsehen würde. Er wusste, dass er vorsichtig sein musste."}, {"time": "[03:14]->[03:46]", "de": "Ich habe ihn nicht zur Rede gestellt. Noch nicht. Stattdessen suchte ich die Namen im Internet."}, {"time": "[03:14]->[03:46]", "de": "Niklas, Lea. Tausende von Ergebnissen. Dann suchte ich mit seinem Nachnamen Niklas Wagner, Lea Wagner."}, {"time": "[03:46]->[04:19]", "de": "Und ich sah es. Ein Familienfoto, das vor drei Monaten auf Facebook gepostet wurde. Paul stand neben einer Frau, zwei Kinder vor ihnen. Ein Junge, vielleicht sieben, ein Mädchen vielleicht fünf. Mein Herz blieb stehen."}, {"time": "[03:46]->[04:19]", "de": "Ich vergrößerte das Bild. Die gleiche Uhr, die Paul trägt, die gleichen Schuhe, die gleiche Jacke, die ich ihm zu Weihnachten gekauft habe. Der Name der Frau war Clara."}, {"time": "[04:19]->[04:51]", "de": "Ihr Profil war öffentlich. Verheiratet, zwei Kinder, Wohnort zwei Stunden von unserem Haus entfernt. Acht Jahre verheiratet. Acht Jahre, genau wie wir."}, {"time": "[04:19]->[04:51]", "de": "Ich scrollte durch ihre Fotos. Geburtstagsfeiern, Schulveranstaltungen, Festessen. Paul lächelte, hielt die Kinder im Arm, küsste ihre Stirn."}, {"time": "[04:52]->[05:23]", "de": "Genau so, wie er meine küsste. Ich rief die Nummer an, die auf ihrem Profil stand. Ich sagte:„Hallo, ist dort Clara?\"Sie sagte:„Ja, am Apparat.\"Ich sagte:„Mein Name ist Lena."}, {"time": "[04:52]->[05:23]", "de": "Ich glaube, wir sind mit demselben Mann verheiratet.\"Stille. Dann lachte Clara. Nicht, weil es lustig war, sondern weil es unmöglich war."}, {"time": "[05:24]->[05:55]", "de": "Sie sagte:„Sie müssen sich irren.\"Ich sagte:„Mein Mann heißt Paul Wagner. Er verreist beruflich.\"Clara sagte:„Meiner auch.\"Ihre Stimme zitterte. Ich sagte:„Kommt er freitags nach Hause?\"Sie sagte:„Ja.\"Meine Beine fühlten sich schwach an. Ich sagte:„Fährt er am Montagmorgen weg? Manchmal auch am Sonntagabend?"}, {"time": "[05:56]->[06:26]", "de": "Er verbringt Dienstag bis Donnerstag bei Ihnen.\"Clara erstarrte. Sie sagte:„Oh mein Gott Am nächsten Tag trafen wir uns in einem Café. Ich holte mein Handy heraus und zeigte ihr Hochzeitsfotos."}, {"time": "[05:56]->[06:26]", "de": "Clara tat dasselbe. Andere Kirche, dasselbe Jahr. Paul hat sie zuerst geheiratet, zehn Monate vor mir."}, {"time": "[06:27]->[06:58]", "de": "Er hat mich geheiratet in dem Wissen, dass er bereits Ehemann und bereits Vater war. Ich konnte es nicht glauben. Clara fragte:„Wie lange schon?\"Ich sagte:„Acht Jahre.\"Ihre Augen füllten sich mit Tränen. Clara erzählte mir, wie sie sich auf einer Wohltätigkeitsveranstaltung kennengelernt haben. Paul war nett und lustig."}, {"time": "[06:58]->[07:31]", "de": "Clara sagte, er habe hart gearbeitet. Paul verpasste einige Schulveranstaltungen, aber er entschuldigte sich immer. Er brachte immer Geschenke mit. Ich erinnerte mich an die Geschenke, die Paul mir von seinen Geschäftsreisen mitbrachte. Ich fühlte mich verletzt."}, {"time": "[06:58]->[07:31]", "de": "Wir beschlossen, ihn gemeinsam zur Rede zu stellen. Wir warteten in meinem Haus. Paul kam um neunzehn Uhr nach Hause."}, {"time": "[07:32]->[08:08]", "de": "Er trug seinen Koffer. Paul blieb stehen, als er Clara sah. Sein Gesicht wurde kreideweiß. Sein Blick wanderte von Clara zu mir."}, {"time": "[07:32]->[08:08]", "de": "Sein Mund öffnete sich, aber es kamen keine Worte heraus. Ich sagte:„Willst du das erklären?\"Paul sah Clara, dann mich. Er sagte:„Ich kann das erklären.\"Clara sagte:„Nein, fang mit dem Warum an.\"Paul setzte sich auf das Sofa."}, {"time": "[08:08]->[08:41]", "de": "Er sagte:„Ich habe das nicht geplant.\"Ich sagte:„Du hast zwei Frauen geheiratet. Das erfordert Planung.\"Paul sagte:„Ich habe euch beide geliebt.\"Clara fragte:„Hast du uns beide angelogen?\"Er antwortete:„Ja.\"Ich war wütend. Ich sagte:„Wie? Wie hast du das geschafft?\"Paul sagte, er arbeite in verschiedenen Städten."}, {"time": "[08:42]->[09:16]", "de": "Er mietete zwei Wohnungen, eine in der Nähe von jedem Haus und erzählte jeder von uns, dass er dort wegen der Arbeit bleibe. Vorsichtige Lügen, getrennte Bankkonten, getrennte Kreditkarten. Er sagte, es sei mit der Zeit einfacher geworden. Ich fragte:„Welche Familie war echt?\"Paul schaute auf den Boden. Er sagte:„Beide.\"Mein Herz brach."}, {"time": "[09:16]->[09:47]", "de": "Ich dachte an unsere Abendessen, unsere Reisen, die Nächte, in denen er mich hielt und sagte:„Du bist meine ganze Welt.\"Jetzt weiß ich, dass ich nur die halbe Welt war. Clara fing an zu weinen. Sie sagte:„Was ist mit den Kindern?\"Paul sagte:„Sie wissen es nicht. Bitte sagt es ihnen nicht.\"Da veränderte sich etwas in mir."}, {"time": "[09:48]->[10:21]", "de": "Es ging nicht mehr Liebe oder Schmerz. Es ging um den Charakter. Darum, was für ein Mann seine Kinder ansehen und eine Lüge leben kann, der ihnen einen Gutenachtkuss geben und zu einer anderen Ehefrau fahren kann. Ich verließ den Raum."}, {"time": "[09:48]->[10:21]", "de": "Ich brauchte Luft. Paul folgte mir nach draußen. Er sagte:„Lena, bitte hör mir zu.\"Ich drehte mich nicht um."}, {"time": "[10:21]->[10:53]", "de": "Ich fragte:„Wie oft hast du mich geküsst, nachdem du sie geküsst hast?\"Paul sagte nichts. Das war meine Antwort. Der Scheidungsprozess war lang und chaotisch. Anwälte stellten Fragen, die ich nicht beantworten wollte. Familie, die sagte:„Wir dachten immer, dass etwas nicht stimmt, haben aber nie etwas gesagt.\"Die Kinder fanden es heraus."}, {"time": "[10:54]->[11:32]", "de": "Clara sagte ihnen die Wahrheit. Sie saß mit ihnen auf einer Bank. Niklas weinte."}, {"time": "[10:54]->[11:32]", "de": "Lea hielt ihre Hand. Clara war stark, stärker als ich dachte. Niklas fragte:„Heißt das, Papa liebt uns nicht?\"Ich konnte Claras Antwort nicht hören, aber diese Frage blieb mir im Gedächtnis, weil ich mich dasselbe fragte: Hat Paul uns geliebt oder liebte er das Gefühl, zwei Zuhause zu haben, in die er flüchten konnte?"}, {"time": "[11:34]->[12:08]", "de": "Monate vergingen. Die Wut kühlte ab. Ich verstand etwas. Er hat nicht zwei Familien gegründet, weil er uns liebte. Er hat zwei Familien gegründet, weil er Angst hatte, allein zu sein."}, {"time": "[11:34]->[12:08]", "de": "Also wählte er beide und verlor beide. Ich hasse Clara nicht. Wir sprechen manchmal miteinander, nicht als Freundinnen, sondern als zwei Frauen, die dieselbe Lüge gelebt haben."}, {"time": "[12:08]->[12:44]", "de": "Wir erinnern uns gegenseitig daran, dass wir nicht dumm waren, sondern vertrauensvoll. Früher dachte ich, Verrat sei laut und dramatisch. Ist er nicht."}, {"time": "[12:08]->[12:44]", "de": "Manchmal ist er leise, organisiert. Manchmal sieht Verrat aus wie ein Mann, der lächelnd nach Hause kommt, deine Stirn küsst und fragt, was es zum Abendessen gibt. Ich war acht Jahre lang verheiratet, aber ich war nicht die einzige Ehefrau."}, {"time": "[12:44]->[13:16]", "de": "Er hatte eine andere Familie und ihn zu verlieren, hat mich nicht gebrochen, denn Liebe zeigt sich nicht darin, wie oft jemand nach Hause kommt. Sie zeigt sich darin, ob er jemals weggegangen ist und er war von Anfang an nie ganz da. Wenn dir diese Geschichte gefallen hat, bitte gib ihr ein Like, kommentiere, teile sie und abonniere den Kanal."}]}];
+const STORAGE_PREFIX = "de-ar-stories-v1:";
+let activeTab = localStorage.getItem(STORAGE_PREFIX+"tab") || stories[0].id;
+let voices = [];
+let currentStorySpeech = false;
+
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function loadVoices(){
+  voices = speechSynthesis.getVoices();
+}
+loadVoices();
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = loadVoices;
+
+function germanVoice(){
+  const de = voices.filter(v => /^de(-|_)/i.test(v.lang));
+  return de.find(v => /google/i.test(v.name)) ||
+         de.find(v => /deutsch|german/i.test(v.name)) ||
+         de[0] || voices.find(v => /^de/i.test(v.lang)) || null;
+}
+function speakGerman(text, onend){
+  if (!("speechSynthesis" in window)) return alert("Speech synthesis is not supported in this browser.");
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "de-DE";
+  const v = germanVoice(); if(v) u.voice = v;
+  u.rate = parseFloat($("#rate").value || "0.9");
+  if(onend) u.onend = onend;
+  speechSynthesis.speak(u);
+}
+function speakSequence(storyId, start=0){
+  const story = stories.find(s=>s.id===storyId); if(!story) return;
+  currentStorySpeech = true;
+  const next = i => {
+    if(!currentStorySpeech || i>=story.paragraphs.length) { currentStorySpeech=false; return; }
+    const p = story.paragraphs[i];
+    const key = doneKey(storyId,i);
+    if(localStorage.getItem(key)==="1") return next(i+1);
+    const u = new SpeechSynthesisUtterance(p.de);
+    u.lang="de-DE"; const v=germanVoice(); if(v) u.voice=v;
+    u.rate=parseFloat($("#rate").value||"0.9");
+    u.onend=()=>next(i+1); u.onerror=()=>next(i+1);
+    speechSynthesis.speak(u);
+  };
+  speechSynthesis.cancel(); next(start);
+}
+function stopSpeech(){currentStorySpeech=false; if("speechSynthesis" in window) speechSynthesis.cancel();}
+
+function doneKey(storyId,i){return STORAGE_PREFIX+"done:"+storyId+":"+i}
+function transKey(storyId,i){return STORAGE_PREFIX+"ar:"+storyId+":"+i}
+
+async function googleTranslate(text, sl="de", tl="ar"){
+  const url = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl="+encodeURIComponent(sl)+"&tl="+encodeURIComponent(tl)+"&q="+encodeURIComponent(text);
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Translation service returned "+r.status);
+  const data = await r.json();
+  return (data?.[0]||[]).map(x=>x?.[0]||"").join("");
+}
+async function myMemoryTranslate(text, sl="de", tl="ar"){
+  const url = "https://api.mymemory.translated.net/get?q="+encodeURIComponent(text)+"&langpair="+encodeURIComponent(sl+"|"+tl);
+  const r=await fetch(url);
+  if(!r.ok) throw new Error("Fallback translation failed");
+  const data=await r.json();
+  return data?.responseData?.translatedText || "";
+}
+async function translateText(text, sl="de", tl="ar"){
+  try { return await googleTranslate(text, sl, tl); }
+  catch(e1){ return await myMemoryTranslate(text, sl, tl); }
+}
+function googleTranslateLink(text, sl, tl){
+  return "https://translate.google.com/?sl="+encodeURIComponent(sl)+"&tl="+encodeURIComponent(tl)+"&text="+encodeURIComponent(text)+"&op=translate";
+}
+
+function renderTabs(){
+  const tabs=$("#tabs");
+  tabs.innerHTML = stories.map(s=>`<button class="tab ${activeTab===s.id?'active':''}" data-tab="${s.id}">${esc(s.title_de)}</button>`).join("")
+    + `<button class="tab ${activeTab==='translate'?'active':''}" data-tab="translate">🔎 Übersetzen / ترجمة</button>`;
+  $$(".tab",tabs).forEach(btn=>btn.onclick=()=>{
+    activeTab=btn.dataset.tab;
+    localStorage.setItem(STORAGE_PREFIX+"tab",activeTab);
+    render();
+  });
+}
+function updateProgress(storyId){
+  const story=stories.find(s=>s.id===storyId); if(!story) return;
+  const done=story.paragraphs.filter((_,i)=>localStorage.getItem(doneKey(storyId,i))==="1").length;
+  const pct=Math.round(done/story.paragraphs.length*100);
+  const panel=$(`[data-panel="${storyId}"]`);
+  if(panel){
+    $(".progress-count",panel).textContent=done+" / "+story.paragraphs.length;
+    $(".progress-bar",panel).style.width=pct+"%";
+  }
+}
+function setDone(storyId,i,value){
+  localStorage.setItem(doneKey(storyId,i), value?"1":"0");
+  const card=$(`[data-pid="${storyId}-${i}"]`);
+  if(card){
+    card.classList.toggle("done",value);
+    card.classList.toggle("collapsed",value);
+    $(".chev",card).textContent=value?"▸":"▾";
+  }
+  updateProgress(storyId);
+}
+async function ensureArabic(storyId,i){
+  const key=transKey(storyId,i);
+  let cached=localStorage.getItem(key);
+  const el=$(`[data-ar="${storyId}-${i}"]`);
+  if(!el) return;
+  if(cached){el.textContent=cached; return;}
+  if(el.dataset.loading==="1") return;
+  el.dataset.loading="1";
+  el.textContent="جارٍ تحميل الترجمة…";
+  const story=stories.find(s=>s.id===storyId);
+  try{
+    const ar=await translateText(story.paragraphs[i].de,"de","ar");
+    localStorage.setItem(key,ar);
+    el.textContent=ar;
+  }catch(err){
+    el.innerHTML='تعذّر تحميل الترجمة تلقائيًا. <button class="mini retry">إعادة المحاولة</button>';
+    const b=$(".retry",el); if(b) b.onclick=()=>{el.dataset.loading="0"; ensureArabic(storyId,i)};
+  } finally { el.dataset.loading="0"; }
+}
+async function translateStoryQueue(storyId){
+  const story=stories.find(s=>s.id===storyId); if(!story) return;
+  // Load cached instantly; translate missing items with low concurrency.
+  const missing=[];
+  story.paragraphs.forEach((_,i)=>{
+    const cached=localStorage.getItem(transKey(storyId,i));
+    const el=$(`[data-ar="${storyId}-${i}"]`);
+    if(cached && el) el.textContent=cached; else missing.push(i);
+  });
+  let cursor=0;
+  async function worker(){
+    while(cursor<missing.length){
+      const i=missing[cursor++];
+      if(activeTab!==storyId) break;
+      await ensureArabic(storyId,i);
+      await new Promise(r=>setTimeout(r,180));
+    }
+  }
+  await Promise.all([worker(),worker()]);
+}
+
+function storyPanel(story){
+  const cards=story.paragraphs.map((p,i)=>{
+    const done=localStorage.getItem(doneKey(story.id,i))==="1";
+    const ar=localStorage.getItem(transKey(story.id,i)) || "جارٍ تحميل الترجمة…";
+    return `<article class="para ${done?'done collapsed':''}" data-pid="${story.id}-${i}">
+      <div class="para-head">
+        <label class="done-label"><input type="checkbox" ${done?'checked':''} data-done="${story.id}-${i}"> <span>Done / تم</span></label>
+        <span class="time">${esc(p.time)}</span>
+        <span class="preview">${esc(p.de)}</span>
+        <button class="chev" data-toggle="${story.id}-${i}" title="Collapse / expand">${done?'▸':'▾'}</button>
+      </div>
+      <div class="para-body">
+        <section class="lang-card">
+          <div class="lang-label"><span>Deutsch</span><span>🇩🇪</span></div>
+          <div class="lang-text">${esc(p.de)}</div>
+          <div class="inline-actions">
+            <button class="mini" data-speak="${story.id}-${i}">🔊 Anhören</button>
+            <button class="mini" data-copy="${story.id}-${i}">⧉ Kopieren</button>
+          </div>
+        </section>
+        <section class="lang-card">
+          <div class="lang-label"><span>العربية</span><span>🇪🇬</span></div>
+          <div class="lang-text ar" data-ar="${story.id}-${i}">${esc(ar)}</div>
+          <div class="inline-actions">
+            <button class="mini" data-retranslate="${story.id}-${i}">↻ إعادة الترجمة</button>
+          </div>
+        </section>
+      </div>
+    </article>`;
+  }).join("");
+  return `<section class="panel active" data-panel="${story.id}">
+    <div class="story-head">
+      <div class="story-title">
+        <h2>${esc(story.title_de)}</h2>
+        <div class="ar-title">${esc(story.title_ar)}</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress / التقدم</span><span class="progress-count">0 / ${story.paragraphs.length}</span></div>
+        <div class="progress"><div class="progress-bar"></div></div>
+      </div>
+    </div>
+    <div class="story-actions">
+      <button class="btn primary" data-readstory="${story.id}">▶ Read German story</button>
+      <button class="btn" data-stop>■ Stop</button>
+      <button class="btn" data-expand="${story.id}">Expand all</button>
+      <button class="btn" data-collapse="${story.id}">Collapse done</button>
+    </div>
+    ${cards}
+  </section>`;
+}
+function translationPanel(){
+  return `<section class="panel active" data-panel="translate">
+    <div class="translation-box">
+      <h2 style="margin-top:0">General translation / الترجمة العامة</h2>
+      <div class="trans-row">
+        <select id="direction" class="select">
+          <option value="de-ar">Deutsch → العربية</option>
+          <option value="ar-de">العربية → Deutsch</option>
+        </select>
+        <button id="swap" class="btn">⇄ Swap</button>
+        <button id="doTranslate" class="btn primary">Translate</button>
+        <button id="openGoogle" class="btn">Open in Google Translate ↗</button>
+      </div>
+      <div class="translation-grid">
+        <div class="translation-pane">
+          <p class="status" id="srcLabel">Deutsch</p>
+          <textarea id="transInput" placeholder="Type any German word, phrase, or sentence…"></textarea>
+          <div class="inline-actions">
+            <button id="speakInput" class="mini">🔊 German TTS</button>
+            <button id="clearTrans" class="mini">Clear</button>
+          </div>
+        </div>
+        <div class="translation-pane">
+          <p class="status" id="dstLabel">العربية</p>
+          <div id="transOutput" class="trans-result ar">ستظهر الترجمة هنا.</div>
+          <div class="inline-actions">
+            <button id="speakOutput" class="mini">🔊 German TTS</button>
+            <button id="copyOutput" class="mini">⧉ Copy</button>
+          </div>
+        </div>
+      </div>
+      <p class="note">Tip: press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to translate. If the inline service is unavailable, “Open in Google Translate” keeps the same text and direction.</p>
+      <p class="note">German speech uses the browser Web Speech API and prefers a voice whose name contains “Google” and language is German; otherwise it falls back to another installed <b>de-DE</b> voice.</p>
+    </div>
+  </section>`;
+}
+
+function wireStory(story){
+  $$(`[data-done^="${story.id}-"]`).forEach(cb=>cb.onchange=()=>{
+    const i=+cb.dataset.done.split("-").pop(); setDone(story.id,i,cb.checked);
+  });
+  $$(`[data-toggle^="${story.id}-"]`).forEach(btn=>btn.onclick=()=>{
+    const i=+btn.dataset.toggle.split("-").pop();
+    const card=$(`[data-pid="${story.id}-${i}"]`);
+    card.classList.toggle("collapsed");
+    btn.textContent=card.classList.contains("collapsed")?"▸":"▾";
+  });
+  $$(`[data-speak^="${story.id}-"]`).forEach(btn=>btn.onclick=()=>{
+    const i=+btn.dataset.speak.split("-").pop(); speakGerman(story.paragraphs[i].de);
+  });
+  $$(`[data-copy^="${story.id}-"]`).forEach(btn=>btn.onclick=async()=>{
+    const i=+btn.dataset.copy.split("-").pop(); await navigator.clipboard.writeText(story.paragraphs[i].de);
+    const old=btn.textContent; btn.textContent="✓ Copied"; setTimeout(()=>btn.textContent=old,900);
+  });
+  $$(`[data-retranslate^="${story.id}-"]`).forEach(btn=>btn.onclick=()=>{
+    const i=+btn.dataset.retranslate.split("-").pop();
+    localStorage.removeItem(transKey(story.id,i)); ensureArabic(story.id,i);
+  });
+  $(`[data-readstory="${story.id}"]`).onclick=()=>speakSequence(story.id,0);
+  $("[data-stop]").onclick=stopSpeech;
+  $(`[data-expand="${story.id}"]`).onclick=()=>{
+    $$(`[data-pid^="${story.id}-"]`).forEach(card=>{card.classList.remove("collapsed"); $(".chev",card).textContent="▾";});
+  };
+  $(`[data-collapse="${story.id}"]`).onclick=()=>{
+    story.paragraphs.forEach((_,i)=>{
+      const card=$(`[data-pid="${story.id}-${i}"]`);
+      if(localStorage.getItem(doneKey(story.id,i))==="1"){card.classList.add("collapsed"); $(".chev",card).textContent="▸";}
+    });
+  };
+  updateProgress(story.id);
+  translateStoryQueue(story.id);
+}
+function wireTranslation(){
+  const dir=$("#direction"), input=$("#transInput"), out=$("#transOutput");
+  function labels(){
+    const [sl,tl]=dir.value.split("-");
+    $("#srcLabel").textContent=sl==="de"?"Deutsch":"العربية";
+    $("#dstLabel").textContent=tl==="de"?"Deutsch":"العربية";
+    input.classList.toggle("ar",sl==="ar");
+    out.classList.toggle("ar",tl==="ar");
+    input.placeholder=sl==="de"?"Type any German word, phrase, or sentence…":"اكتب أي كلمة أو عبارة أو جملة بالعربية…";
+  }
+  dir.onchange=labels; labels();
+  $("#swap").onclick=()=>{dir.value=dir.value==="de-ar"?"ar-de":"de-ar"; const t=input.value; input.value=out.textContent.startsWith("ستظهر")?"":out.textContent; out.textContent=t||""; labels();};
+  async function run(){
+    const text=input.value.trim(); if(!text) return;
+    const [sl,tl]=dir.value.split("-");
+    out.textContent= tl==="ar" ? "جارٍ الترجمة…" : "Übersetzung wird geladen…";
+    try{out.textContent=await translateText(text,sl,tl);}
+    catch(e){out.textContent=tl==="ar"?"تعذّر تحميل الترجمة. استخدم زر Google Translate.":"Übersetzung konnte nicht geladen werden. Bitte Google Translate öffnen.";}
+  }
+  $("#doTranslate").onclick=run;
+  input.addEventListener("keydown",e=>{if(e.ctrlKey&&e.key==="Enter") run();});
+  $("#openGoogle").onclick=()=>{const [sl,tl]=dir.value.split("-"); window.open(googleTranslateLink(input.value,sl,tl),"_blank","noopener");};
+  $("#clearTrans").onclick=()=>{input.value="";out.textContent="";};
+  $("#copyOutput").onclick=()=>navigator.clipboard.writeText(out.textContent);
+  $("#speakInput").onclick=()=>{if(dir.value.startsWith("de-")) speakGerman(input.value);};
+  $("#speakOutput").onclick=()=>{if(dir.value.endsWith("-de")) speakGerman(out.textContent);};
+}
+
+function render(){
+  stopSpeech(); renderTabs();
+  const main=$("#main");
+  if(activeTab==="translate"){main.innerHTML=translationPanel(); wireTranslation(); return;}
+  const story=stories.find(s=>s.id===activeTab)||stories[0];
+  main.innerHTML=storyPanel(story); wireStory(story);
+}
+
+// Theme
+const theme=$("#theme");
+const savedTheme=localStorage.getItem(STORAGE_PREFIX+"theme")||"dark";
+document.documentElement.dataset.theme=savedTheme; theme.value=savedTheme;
+theme.onchange=()=>{document.documentElement.dataset.theme=theme.value; localStorage.setItem(STORAGE_PREFIX+"theme",theme.value);};
+
+render();
+</script>
+</body>
+</html>
